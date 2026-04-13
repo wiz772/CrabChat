@@ -1,9 +1,16 @@
 use std::net::{TcpListener, TcpStream};
 use std::thread;
+use std::io::Read;
+use std::io::Write;
 const LISTENER_ADDR: &str ="127.0.0.1:8080"; 
 
 fn handle_client(mut client: TcpStream){ 
+    let mut buffer = [0; 1024];
+    let bytes = client.read(&mut buffer).unwrap();
+    let msg = String::from_utf8_lossy(&buffer[..bytes]);
 
+    println!("[MSG] {} bytes", bytes);
+    println!("  - {}", msg);
 }
 
 fn display_connection_log(stream: &TcpStream){
@@ -13,13 +20,13 @@ fn display_connection_log(stream: &TcpStream){
     }
 }
 
-fn dispatch_client(mut stream: TcpStream){
+fn dispatch_client(stream: TcpStream){
     thread::spawn(move|| {
         handle_client(stream);
     }); 
 }
 
-fn handle_incoming_connection(mut stream: TcpStream){
+fn handle_incoming_connection(stream: TcpStream){
     display_connection_log(&stream);
     dispatch_client(stream);
 }
@@ -40,6 +47,19 @@ fn start_listening(){
     } 
 }
 
+fn client_test(){
+    let stream = TcpStream::connect(LISTENER_ADDR);
+    match stream{
+        Ok(mut stream) => { stream.write(b"Hello server").unwrap(); }
+        Err(e) => {println!("[CLIENT ERROR] : {}", e)}
+    }
+}
+
 fn main() {
-    start_listening();
+    std::thread::spawn(move || {
+        start_listening();
+    });
+    client_test();
+
+    loop{}
 }
