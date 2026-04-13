@@ -1,6 +1,7 @@
 use std::io::Write;
 use std::net::TcpStream;
 use std::io::Result;
+
 pub struct Client {
     stream: TcpStream,
     username: String
@@ -20,5 +21,3 @@ impl Client{
     }
 
 }
-
- 
