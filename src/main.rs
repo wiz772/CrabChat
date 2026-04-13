@@ -1,7 +1,9 @@
 use std::net::{TcpListener, TcpStream};
 use std::thread;
 use std::io::Read;
-use std::io::Write;
+use std::time::Duration;
+use client::Client;
+
 const LISTENER_ADDR: &str ="127.0.0.1:8080"; 
 
 fn handle_client(mut client: TcpStream){ 
@@ -47,19 +49,20 @@ fn start_listening(){
     } 
 }
 
-fn client_test(){
-    let stream = TcpStream::connect(LISTENER_ADDR);
-    match stream{
-        Ok(mut stream) => { stream.write(b"Hello server").unwrap(); }
-        Err(e) => {println!("[CLIENT ERROR] : {}", e)}
-    }
-}
 
 fn main() {
     std::thread::spawn(move || {
         start_listening();
     });
-    client_test();
+
+    thread::sleep(Duration::from_millis(100));
+
+    let mut client1 = Client::new(LISTENER_ADDR, "gougou".to_string()).unwrap();
+    client1.write("la famax krili").unwrap();
+
 
     loop{}
 }
+
+
+mod client;
