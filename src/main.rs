@@ -12,9 +12,10 @@ fn start_listening(){
     for stream in listener.incoming(){ 
         match stream{
             Ok(mut stream) => {
-                let ip_addr = stream.peer_addr().unwrap();
-                println!("Connected: {}", ip_addr);
-
+                match stream.peer_addr() {
+                    Ok(addr) =>  println!("Connected: {}", addr),
+                    Err(e) => println!("Could not get client address: {}", e),
+                }
                 // créer thread par client
                 thread::spawn(move ||{
                     handle_client(stream);
