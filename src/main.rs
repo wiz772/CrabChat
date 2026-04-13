@@ -22,3 +22,4 @@ fn main() {
 mod client;
 mod server;
 mod protocol;
+mod logger;

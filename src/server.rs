@@ -1,6 +1,7 @@
 use std::net::{TcpListener, TcpStream};
 use std::thread;
 use std::io::Read;
+use crate::logger;
 
 
 const LISTENER_ADDR: &str ="127.0.0.1:8080"; 
@@ -21,8 +22,8 @@ fn handle_client(mut client: TcpStream){
 
 fn display_connection_log(stream: &TcpStream){
     match stream.peer_addr() {
-        Ok(addr) =>  println!("Connected: {}", addr),
-        Err(e) => println!("[ERROR] Could not get client address: {}", e),
+        Ok(addr) =>  logger::info(&format!("Connected: {}", addr)),
+        Err(e) => logger::error(&format!("Couldn't resolve ip address: {}", e)),
     }
 }
 
@@ -39,7 +40,7 @@ fn handle_incoming_connection(stream: TcpStream){
 
 fn start_listening(){ 
     let listener = TcpListener::bind(LISTENER_ADDR).unwrap();
-    println!("Server started."); 
+    logger::info("Server started.");
     for stream in listener.incoming(){ 
         match stream{
             Ok(stream) => {
@@ -47,10 +48,14 @@ fn start_listening(){
             }
 
             Err(e) => {
-                println!("[ERROR] {}", e)
+                logger::error(&e.to_string());
             }
         }
     } 
+}
+
+fn broadcast(){
+
 }
 
 pub fn init_server_thread(){
