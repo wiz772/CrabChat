@@ -8,12 +8,23 @@ pub enum Message {
 
 impl Message {
 
-    pub fn encode(&self){
+    pub fn encode(&self) -> String {
+
+        match self {
+
+            Message::Chat { content } => format!("CHAT|{}", content),
+            Message::Login { user } => format!("LOGIN|{}", user),
+            Message::Ping {} => "PING".to_string()
+
+        }
 
     }
 
-    pub fn decode(){
+    // pub fn decode(input: &str) -> Result<Message, String> {
+    //     let mut parts = input.splitn(2, '|');
+    //     let kind =
+    //     let content = 
 
-    }
+    // }
 }
 
