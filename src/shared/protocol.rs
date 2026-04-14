@@ -20,11 +20,26 @@ impl Message {
 
     }
 
-    // pub fn decode(input: &str) -> Result<Message, String> {
-    //     let mut parts = input.splitn(2, '|');
-    //     let kind =
-    //     let content = 
+    pub fn decode(input: &str) -> Result<Message, String> {
+        let mut parts = input.splitn(2, '|');
+        let kind = parts.next().ok_or("Malformed protocol message, no kind.")?;
+        let content = parts.next();
+        match kind {
+            "CHAT" => {
+                let content = content.ok_or("Missing chat content.")?;
+                Ok(Message::Chat { content: content.to_string() })
+            }
 
-    // }
+            "LOGIN" => {
+                let content = content.ok_or("Missing login content.")?;
+                Ok(Message::Login { user: content.to_string() })
+            }
+
+            "PING" => {
+                Ok(Message::Ping)
+            }
+            _ => Err("Malformed protocol message, dropping it".into())
+        }
+    }
 }
 
