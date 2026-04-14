@@ -1,6 +1,6 @@
 pub enum Message {
 
-    Chat { user: String, content: String},
+    Chat { content: String},
     Login { user: String },
     Ping,
 

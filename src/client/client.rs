@@ -1,6 +1,7 @@
-use std::io::Write;
 use std::net::TcpStream;
 use std::io::Result;
+
+use crate::shared::protocol::Message;
 
 pub struct Client {
     stream: TcpStream,
@@ -14,9 +15,8 @@ impl Client{
         Ok(Client { stream, username })
     }
 
-    pub fn write(&mut self, msg: &str) -> Result<()> {
-        let full_msg = format!("{}: {}", self.username, msg);
-        self.stream.write_all(full_msg.as_bytes())?;
+    pub fn send(&mut self, msg: Message) -> Result<()> {
+
         Ok(())
     }
 

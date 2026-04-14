@@ -1,7 +1,7 @@
 use std::thread;
 use std::time::Duration;
-use client::Client;
-use server::init_server_thread;
+use crate::client::client::Client;
+use crate::server::server::init_server_thread;
 
 const LISTENER_ADDR: &str ="127.0.0.1:8080"; 
 
@@ -12,7 +12,7 @@ fn main() {
     thread::sleep(Duration::from_millis(100));
 
     let mut client1 = Client::new(LISTENER_ADDR, "gougou".to_string()).unwrap();
-    client1.write("la famax krili").unwrap();
+    // client1.write("la famax krili").unwrap();
 
 
     std::thread::sleep(std::time::Duration::from_secs(10));
@@ -21,5 +21,4 @@ fn main() {
 
 mod client;
 mod server;
-mod protocol;
-mod logger;
+mod shared;
