@@ -22,7 +22,7 @@ impl Message {
 
     pub fn decode(input: &str) -> Result<Message, String> {
         let mut parts = input.splitn(2, '|');
-        let kind = parts.next().ok_or("Malformed protocol message, no kind.")?;
+        let kind = parts.next().ok_or("Malformed protocol message, missing kind.")?;
         let content = parts.next();
         match kind {
             "CHAT" => {
