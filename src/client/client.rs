@@ -1,7 +1,7 @@
 use std::net::TcpStream;
 use std::io::Result;
 
-use crate::shared::protocol::Message;
+use crate::shared::protocol::ClientMessage;
 
 pub struct Client {
     stream: TcpStream,
@@ -15,7 +15,7 @@ impl Client{
         Ok(Client { stream, username })
     }
 
-    pub fn send(&mut self, msg: Message) -> Result<()> {
+    pub fn send(&mut self, msg: ClientMessage) -> Result<()> {
 
         Ok(())
     }

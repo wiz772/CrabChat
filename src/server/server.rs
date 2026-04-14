@@ -2,27 +2,29 @@ use std::net::{TcpListener, TcpStream};
 use std::thread;
 use std::io::Read;
 use crate::server::logger;
-use crate::shared::protocol::Message;
+use crate::shared::protocol::ClientMessage;
 
 const LISTENER_ADDR: &str ="127.0.0.1:8080"; 
 
+pub fn disconnect_client(){}
+
 fn handle_msg(message: String){
-    match Message::decode(&message){
+    match ClientMessage::decode(&message){
         Ok(msg) => {
         
             match msg{
 
-                Message::Chat { content } => {
+                ClientMessage::Chat { content } => {
                     // Vérifier si le client est login
                     // S'il l'est envoyer en broadcast
                     // Sinon void le msg
                 }
 
-                Message::Login { user } => {
-                    // add client à la hashmap, à faire server state
+                ClientMessage::Login { user } => {
+                    // add client à la hashmap, à faire
                 }
 
-                Message::Ping => {
+                ClientMessage::Ping => {
                     // renvoyer un pong
                 }
 
@@ -41,7 +43,8 @@ fn handle_client(mut stream: TcpStream){
         let bytes = stream.read(&mut buffer).unwrap();
 
         if bytes == 0 {
-            break; 
+            disconnect_client();
+            break;
         }
 
         let msg = String::from_utf8_lossy(&buffer[..bytes]);
