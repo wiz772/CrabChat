@@ -51,7 +51,7 @@ fn handle_client(client_session: Session, sessions: Sessions){
             session.read(&mut buffer).unwrap()
         };
         if bytes == 0 {
-            disconnect_client(client_session: Session, sessions: Sessions);
+            disconnect_client(client_session, sessions);
             break;
         }
 
