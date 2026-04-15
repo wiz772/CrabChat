@@ -3,17 +3,12 @@ use std::thread;
 use std::io::Read;
 use crate::server::logger;
 use crate::shared::protocol::ClientMessage;
-use crate::server::client_session::{ClientSession, Sessions, Session};
-use std::sync::{Arc, Mutex};
-use std::collections::HashMap;
-
 
 const LISTENER_ADDR: &str ="127.0.0.1:8080"; 
 
-fn disconnect_client(client_session: Session, sessions: Sessions){}
+pub fn disconnect_client(){}
 
-
-fn handle_msg(client_session: Session, message: String, sessions: Sessions){
+fn handle_msg(message: String){
     match ClientMessage::decode(&message){
         Ok(msg) => {
         
@@ -42,21 +37,18 @@ fn handle_msg(client_session: Session, message: String, sessions: Sessions){
 
 }
 
-fn handle_client(client_session: Session, sessions: Sessions){ 
-    let mut buffer: [u8; 1024] = [0; 1024];
+fn handle_client(mut stream: TcpStream){ 
+    let mut buffer = [0; 1024];
     loop {
+        let bytes = stream.read(&mut buffer).unwrap();
 
-        let bytes = {
-            let mut session = client_session.lock().unwrap();
-            session.read(&mut buffer).unwrap()
-        };
         if bytes == 0 {
-            disconnect_client(client_session, sessions);
+            disconnect_client();
             break;
         }
 
         let msg = String::from_utf8_lossy(&buffer[..bytes]);
-        handle_msg( client_session.clone(), msg.to_string(), sessions.clone());
+        handle_msg(msg.to_string() );
     }
 }
 
@@ -67,49 +59,24 @@ fn log_connection(stream: &TcpStream){
     }
 }
 
-fn generate_id(sessions: &Sessions) -> usize {
-    let s = sessions.lock().unwrap();
-    let id = s.len() + 1;
-    id
+fn dispatch_client(stream: TcpStream){
+    thread::spawn(move|| {
+        handle_client(stream);
+    }); 
 }
 
-fn create_client_session(stream: TcpStream, sessions: &Sessions) -> (usize, Arc<Mutex<ClientSession>>){
-    let id = generate_id(&sessions);
-
-    let client_session = Arc::new(Mutex::new(
-        ClientSession::new(id, stream).unwrap() 
-    ));
-
-    (id, client_session)
-}
-
-fn insert_client_session_in_global_sessions(id: usize, client_session: Session, sessions: &Sessions){
-    sessions.lock().unwrap().insert(id, client_session);
-    logger::info("Added a  client_session");
-}
-
-fn dispatch_client(stream: TcpStream, sessions: Sessions){
-    let (id, client_session) = create_client_session(stream, &sessions);
-
-    insert_client_session_in_global_sessions(id, client_session.clone(), &sessions);
-
-    thread::spawn(move || {
-        handle_client(client_session, sessions);
-    });
-}
-
-fn handle_incoming_connection(stream: TcpStream, sessions: Sessions){
+fn handle_incoming_connection(stream: TcpStream){
     log_connection(&stream);
-    dispatch_client(stream, sessions);
+    dispatch_client(stream);
 }
 
-fn start_listening(sessions: Sessions){ 
+fn start_listening(){ 
     let listener = TcpListener::bind(LISTENER_ADDR).unwrap();
     logger::info("Server started.");
     for stream in listener.incoming(){ 
         match stream{
             Ok(stream) => {
-                handle_incoming_connection(stream, sessions.clone());         
+                handle_incoming_connection(stream);         
             }
 
             Err(e) => {
@@ -119,12 +86,12 @@ fn start_listening(sessions: Sessions){
     } 
 }
 
-fn broadcast(sessions: Sessions, message: String){}
+fn broadcast(){
 
+}
 
 pub fn init_server_thread(){
-    let sessions: Sessions = Arc::new(Mutex::new(HashMap::new()));
-    thread::spawn(move || {
-        start_listening(sessions);
+    std::thread::spawn(move || {
+        start_listening();
     });
 }
